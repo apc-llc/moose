@@ -16,25 +16,29 @@ srcfiles    := $(shell find $(SRC_DIRS) -name "*.C" -not -name main.C)
 csrcfiles   := $(shell find $(SRC_DIRS) -name "*.c")
 fsrcfiles   := $(shell find $(SRC_DIRS) -name "*.f")
 f90srcfiles := $(shell find $(SRC_DIRS) -name "*.f90")
+cudasrcfiles := $(shell find $(SRC_DIRS) -name "*.cu")
 
 # object files
 objects	    := $(patsubst %.C, %.$(obj-suffix), $(srcfiles))
 cobjects    := $(patsubst %.c, %.$(obj-suffix), $(csrcfiles))
 fobjects    := $(patsubst %.f, %.$(obj-suffix), $(fsrcfiles))
 f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
-app_objects := $(objects) $(cobjects) $(fobjects) $(f90objects) $(ADDITIONAL_APP_OBJECTS)
+cudaobjects  := $(patsubst %.cu, %.$(obj-suffix), $(cudasrcfiles))
+app_objects := $(objects) $(cobjects) $(fobjects) $(f90objects) $(cudaobjects) $(ADDITIONAL_APP_OBJECTS)
 
 # plugin files
 plugfiles   := $(shell find $(PLUGIN_DIR) -name "*.C" 2>/dev/null)
 cplugfiles  := $(shell find $(PLUGIN_DIR) -name "*.c" 2>/dev/null)
 fplugfiles  := $(shell find $(PLUGIN_DIR) -name "*.f" 2>/dev/null)
 f90plugfiles:= $(shell find $(PLUGIN_DIR) -name "*.f90" 2>/dev/null)
+cudaplugfiles:= $(shell find $(PLUGIN_DIR) -name "*.cu" 2>/dev/null)
 
 # plugins
 plugins	    := $(patsubst %.C, %-$(METHOD).plugin, $(plugfiles))
 plugins	    += $(patsubst %.c, %-$(METHOD).plugin, $(cplugfiles))
 plugins	    += $(patsubst %.f, %-$(METHOD).plugin, $(fplugfiles))
 plugins	    += $(patsubst %.f90, %-$(METHOD).plugin, $(f90plugfiles))
+plugins	    += $(patsubst %.cu, %-$(METHOD).plugin, $(cudaplugfiles))
 
 # main
 main_src    := $(APPLICATION_DIR)/src/main.C    # Main must be located here!

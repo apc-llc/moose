@@ -24,18 +24,20 @@ endif
 # Instead of using Make.common, use libmesh-config to get any libmesh
 # make variables we might need.  Be sure to pass METHOD along to libmesh-config
 # so that it can use the right one!
-libmesh_CXX      ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cxx)
-libmesh_CC       ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cc)
-libmesh_F77      ?= $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
-libmesh_F90      ?= $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
-libmesh_INCLUDE  := $(shell METHOD=$(METHOD) $(libmesh_config) --include)
-libmesh_CPPFLAGS := $(shell METHOD=$(METHOD) $(libmesh_config) --cppflags)
-libmesh_CXXFLAGS := $(shell METHOD=$(METHOD) $(libmesh_config) --cxxflags)
-libmesh_CFLAGS   := $(shell METHOD=$(METHOD) $(libmesh_config) --cflags)
-libmesh_FFLAGS   := $(shell METHOD=$(METHOD) $(libmesh_config) --fflags)
-libmesh_LIBS     := $(shell METHOD=$(METHOD) $(libmesh_config) --libs)
-libmesh_HOST     := $(shell METHOD=$(METHOD) $(libmesh_config) --host)
-libmesh_LDFLAGS  := $(shell METHOD=$(METHOD) $(libmesh_config) --ldflags)
+libmesh_CXX       ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cxx)
+libmesh_CC        ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cc)
+libmesh_F77       ?= $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
+libmesh_F90       ?= $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
+libmesh_CXX       ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cuda)
+libmesh_INCLUDE   := $(shell METHOD=$(METHOD) $(libmesh_config) --include)
+libmesh_CPPFLAGS  := $(shell METHOD=$(METHOD) $(libmesh_config) --cppflags)
+libmesh_CXXFLAGS  := $(shell METHOD=$(METHOD) $(libmesh_config) --cxxflags)
+libmesh_CFLAGS    := $(shell METHOD=$(METHOD) $(libmesh_config) --cflags)
+libmesh_FFLAGS    := $(shell METHOD=$(METHOD) $(libmesh_config) --fflags)
+libmesh_CUDAFLAGS := $(shell METHOD=$(METHOD) $(libmesh_config) --cudaflags)
+libmesh_LIBS      := $(shell METHOD=$(METHOD) $(libmesh_config) --libs)
+libmesh_HOST      := $(shell METHOD=$(METHOD) $(libmesh_config) --host)
+libmesh_LDFLAGS   := $(shell METHOD=$(METHOD) $(libmesh_config) --ldflags)
 
 # Make.common used to provide an obj-suffix which was related to the
 # machine in question (from config.guess, i.e. @host@ in
@@ -114,6 +116,20 @@ pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
 	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+
+#
+# CUDA rules
+#
+
+pcre%.$(obj-suffix) : pcre%.cu $(PCH_DEP)
+	@echo "MOOSE Compiling CUDA $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
+	$(libmesh_LIBTOOL) --tag=CUDA $(LIBTOOLFLAGS) --mode=compile --quiet \
+          $(libmesh_CUDA) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CUDAFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+
+%.$(obj-suffix) : %.cu $(PCH_DEP)
+	@echo "MOOSE Compiling CUDA $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
+	$(libmesh_LIBTOOL) --tag=CUDA $(LIBTOOLFLAGS) --mode=compile --quiet \
+	  $(libmesh_CUDA) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CUDAFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 #
 # Static Analysis
