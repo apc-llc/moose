@@ -1380,7 +1380,7 @@ static PetscErrorCode  DMSetUp_Moose(DM dm)
 
 #undef __FUNCT__
 #define __FUNCT__ "DMSetFromOptions_Moose"
-PetscErrorCode  DMSetFromOptions_Moose(DM dm)
+PetscErrorCode  DMSetFromOptions_Moose(PetscOptions* options, DM dm)
 {
   PetscErrorCode ierr;
   PetscBool      ismoose;
