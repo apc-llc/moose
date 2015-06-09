@@ -28,13 +28,13 @@ libmesh_CXX       ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cxx)
 libmesh_CC        ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cc)
 libmesh_F77       ?= $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
 libmesh_F90       ?= $(shell METHOD=$(METHOD) $(libmesh_config) --fc)
-libmesh_CXX       ?= $(shell METHOD=$(METHOD) $(libmesh_config) --cuda)
+libmesh_CUDA      ?= nvcc
 libmesh_INCLUDE   := $(shell METHOD=$(METHOD) $(libmesh_config) --include)
 libmesh_CPPFLAGS  := $(shell METHOD=$(METHOD) $(libmesh_config) --cppflags)
 libmesh_CXXFLAGS  := $(shell METHOD=$(METHOD) $(libmesh_config) --cxxflags)
 libmesh_CFLAGS    := $(shell METHOD=$(METHOD) $(libmesh_config) --cflags)
 libmesh_FFLAGS    := $(shell METHOD=$(METHOD) $(libmesh_config) --fflags)
-libmesh_CUDAFLAGS := $(shell METHOD=$(METHOD) $(libmesh_config) --cudaflags)
+libmesh_CUDAFLAGS := $(addprefix -Xcompiler=,$(filter -std=gnu++11,$(shell METHOD=$(METHOD) $(libmesh_config) --cxxflags))) -std=c++11 -arch=sm_30
 libmesh_LIBS      := $(shell METHOD=$(METHOD) $(libmesh_config) --libs)
 libmesh_HOST      := $(shell METHOD=$(METHOD) $(libmesh_config) --host)
 libmesh_LDFLAGS   := $(shell METHOD=$(METHOD) $(libmesh_config) --ldflags)
@@ -123,13 +123,13 @@ pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
 
 pcre%.$(obj-suffix) : pcre%.cu $(PCH_DEP)
 	@echo "MOOSE Compiling CUDA $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
-	$(libmesh_LIBTOOL) --tag=CUDA $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CUDA) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CUDAFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
+          $(libmesh_CUDA) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CUDAFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -Xcompiler=-MMD -Xcompiler=-MP -Xcompiler=\"-MF $@.d\" -Xcompiler=-MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.cu $(PCH_DEP)
 	@echo "MOOSE Compiling CUDA $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
-	$(libmesh_LIBTOOL) --tag=CUDA $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CUDA) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CUDAFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
+	  $(libmesh_CUDA) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CUDAFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -Xcompiler=-MMD -Xcompiler=-MP -Xcompiler=\"-MF $@.d\" -Xcompiler=\"-MT $@\" -c $< -o $@
 
 #
 # Static Analysis

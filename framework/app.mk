@@ -133,7 +133,7 @@ $(app_LIB): $(app_objects) $(app_plugin_deps) $(app_HEADER) $(depend_libs)
 $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object)
 	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(app_LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(ADDITIONAL_LIBS)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(app_LIBS) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(ADDITIONAL_LIBS) -L$(shell dirname $(NVCC))/../lib64 -lcudart
 
 # Clang static analyzer
 sa:: $(app_analyzer)
